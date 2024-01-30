@@ -11,6 +11,7 @@ import 'common.dart';
 import 'event.dart';
 
 enum RequestBodyEncoding { JSON, FormURLEncoded, PlainText }
+
 enum HttpMethod { GET, PUT, PATCH, POST, DELETE, HEAD }
 
 final Logger log = Logger('requests');
@@ -383,14 +384,7 @@ class Requests {
         future = client.put(uri, body: requestBody, headers: headers);
         break;
       case HttpMethod.DELETE:
-        final request = http.Request('DELETE', uri);
-        request.headers.addAll(headers);
-
-        if (requestBody != null) {
-          request.body = requestBody;
-        }
-
-        future = client.send(request);
+        future = client.delete(uri, body: requestBody, headers: headers);
         break;
       case HttpMethod.POST:
         future = client.post(uri, body: requestBody, headers: headers);
@@ -404,11 +398,6 @@ class Requests {
     }
 
     var response = await future.timeout(Duration(seconds: timeoutSeconds));
-
-    if (response is http.StreamedResponse) {
-      response = await (http.Response.fromStream(response)
-          as FutureOr<http.StreamedResponse>);
-    }
 
     return await _handleHttpResponse(hostname, response, persistCookies);
   }
